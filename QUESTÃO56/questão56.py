@@ -5,27 +5,33 @@ import pandas as pd
 from sklearn.neural_network import MLPClassifier
 import csv
 
+#começar criando a função Hold Out. Ela vai receber como parametros: dataframe(df), o tamanho do treino(train_size) e o embaralhar(shuffle) que vai ser True ou False
 def hold_out(df, train_size, shuffle=True):
     
-    # Shuffle the dataframe if the shuffle is set to true
+    #se shuffle foi 1:
     if shuffle:
+        #embaralhe o df. A maneira idiomática de fazer isso com o Pandas é usar o método dataframe para amostrar todas as linhas sem substituição: df.sample(frac=1). O argumento da palavra-chave frac especifica a fração de linhas a retornar na amostra aleatória, então frac = 1 significa retornar todas as linhas (em ordem aleatória). Se desejar embaralhar seu dataframe no local e redefinir o índice, você pode fazer, por exemplo, df = df.sample(frac=1).reset_index(drop=True). Aqui, especificar drop = True evita que .reset_index crie uma coluna contendo as entradas de índice antigas.
         df = df.sample(frac=1).reset_index(drop=True)
 
-    # Convert the rows of the dataframe into a list of lists
+    #após embaralhar, eu converto as linhas do dataframe em uma lista de listas e inicio tudo isso criando a data 
     data = []
+
+    #para cada linha dentro das linhas do dataframe:
     for row in df.iterrows():
+
+        #vou dizer que values e index recebem essa linha e vou adicionar à lista data os valores de values transformados em lista.
         index, values = row
         data.append(values.tolist())
 
-    # Split the data into train and test
+    #agora vou dividir a data em treino e teste
     X_train = data[:int(train_size*len(data))]
     X_test = data[int(train_size*len(data)):]
 
-    # Get the correspondent labels to each feature vector
+    #Obtenha os rótulos correspondentes para cada vetor de característica
     y_train = [int(x[-1]) for x in X_train]
     y_test = [int(x[-1]) for x in X_test]
 
-    # Remove the labels from the train and test vectors
+    #Remova os rótulos do treino e dos vetores de teste
     X_train = [x[:-1] for x in X_train]
     X_test = [x[:-1] for x in X_test]
 
@@ -44,56 +50,62 @@ def leave_one_out(df, shuffle=True):
         index, values = row
         data.append(values.tolist())
 
-    # Create a list of lists, in which each iteration of leave one out will be stored
+    #Crie uma lista de listas, na qual cada iteração de deixar um de fora será armazenada
     X_train = []
     X_test = []
     y_train = []
     y_test = []
 
+    #ao percorrer toda a data
     for i in range(len(data)):
+
+        #eu a copio e atribuo a train
         train = data.copy()
+
+        #após isto eu removo a data da vez de train
         train.remove(data[i])
 
+        #o test vai receber a data da vez
         test = data[i]
 
-        # Get the correspondent labels to each feature vector
+        #Obtenha os rótulos correspondentes para cada vetor de característica
         y_train.append([int(x[-1]) for x in train])
         y_test.append(int(test[-1]))
 
-        # Remove the labels from the train and test vectors
+        #Remova os rótulos do treino e dos vetores de teste
         X_train.append([x[:-1] for x in train])
         X_test.append(test[:-1])
 
     return X_train, X_test, y_train, y_test
 
-
+#criar a função ler dados (read_data) que irá receber como parametro file.
 def read_data(file):
-    # Load the features of a file in a dataframe
+    #Carregar os recursos de um arquivo em um dataframe
     return pd.read_csv(file, sep=',', header=None)
 
 
 if __name__ == '__main__':
 
-    # Read the file with the features to classify
+    ##Leia o arquivo com os recursos para classificar
     filename = 'features.txt'
     features = read_data(filename)
 
-    # Split the database using hold out
+    #divida a database utilizando hold out 
     X_train, X_test, y_train, y_test = hold_out(features, train_size=0.9)
 
-    # Create a mlp object (Change the hidden_layer parameters to change the topology of the model)
+    #Crie um objeto mlp (altere os parâmetros hidden_layer para alterar a topologia do modelo)
     mlp = MLPClassifier(hidden_layer_sizes=(5, 3), max_iter=3000)
 
-    # Train the model
+    #treine o modelo
     mlp.fit(X_train, y_train)
 
-    # Evaluate in the test data
+    #Avalie nos dados de teste
     predictions = mlp.predict(X_test)
 
-    # Convert the results to a list
+    #Converta os resultados em uma lista
     predictions = list(predictions)
 
-    # Calculates the accuracy using hold out
+    #calcular a precisão usando hold out
     count = 0
     for x, y in zip(y_test, predictions):
         if x == y:
@@ -102,16 +114,16 @@ if __name__ == '__main__':
     accuracy = count/len(y_test)
     print('Accuracy using hold out: {:.4f}'.format(accuracy))
 
-    # Save the true and the predicted labels to use in question 59 and 60
+    #salvar os rótulos verdadeiros e previstos
     with open('true_and_predict_56.csv', 'w') as outfile:
         rows = [y_test, predictions]
         writer = csv.writer(outfile, delimiter=',')
         writer.writerows(rows)
 
-    # Split the database using leave one out
+    #separar a database usando leave one out 
     X_train, X_test, y_train, y_test = leave_one_out(features)
 
-    # Apply mlp
+    #aplicar o mlp
     print('[INFO] Starting leave one out training...')
     count = 0
     sample_count = 0
@@ -119,13 +131,13 @@ if __name__ == '__main__':
         print('[INFO] Training sample {}/{}'.format(sample_count+1, len(y_train)))
         sample_count += 1
 
-        # Create a mlp object (Change the hidden_layer parameters to change the topology of the model)
+        #Crie um objeto mlp (altere os parâmetros hidden_layer para alterar a topologia do modelo)
         mlp = MLPClassifier(hidden_layer_sizes=(5, 3), max_iter=3000)
 
-        # Train the model
+        #treine o modelo
         mlp.fit(train_set, label_train)
 
-        # Evaluate in the test data
+        #Avalie nos dados de teste
         new_list = []
         new_list.append(test_set)
         prediction = mlp.predict(new_list)
