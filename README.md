@@ -3,6 +3,14 @@
 
 Cada exercício é projetado para abordar um tópico específico da visão computacional, desde o processamento básico de imagens até tarefas mais avançadas como detecção de objetos e reconhecimento facial.
 
+# Pré-requisitos
+- Python 3 instalado (recomendado Python 3.6 ou superior)
+- Bibliotecas necessárias podem ser instaladas executando:
+
+pip install -r requirements.txt
+
+
+
 # Estrutura do Repositório
 1/: Contém o exercício 1.
 .
