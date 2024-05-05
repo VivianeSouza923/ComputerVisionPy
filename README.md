@@ -11,7 +11,7 @@ Cada exercício está em um arquivo Python separado. Para executar um exercício
 
 Por exemplo:
 
-python 1/questao1.py
+1/questao1.py (1 é o nome da pasta e cresce até 60.)
 
 # Contribuindo
 ## Sinta-se à vontade para contribuir com novos exercícios ou melhorias nos existentes. Basta seguir estas etapas:
